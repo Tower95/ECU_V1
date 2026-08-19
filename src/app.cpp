@@ -1,7 +1,7 @@
 #include"app.hpp"
 #include"ecu.hpp"
-#include <iostream>
 #include"manual_input.hpp"
+#include <iostream>
 
 App::App(int argc, char* argv[]){
   std::string arg =(argc > 1) ? argv[1] :"";
@@ -25,7 +25,7 @@ int App::run(){
 
 void App::runManual(){
   std::cout << "[INFO] Iniciando modo manual...\n" ;
-  std::cout << getInputUser("TEMPERATURA") <<std::endl;
+  std::cout << getInputUserDouble("TEMPERATURA") <<std::endl;
   // TODO 
 }
 
