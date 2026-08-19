@@ -1,0 +1,25 @@
+# Carpeta de salida y binarios
+bin/
+*.exe
+*.out
+*.app
+
+# Archivos objeto y librerías compiladas
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+# Archivos de depuración y temporales
+*.dSYM/
+*.pdb
+*.ilk
+
+# Editores y sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
