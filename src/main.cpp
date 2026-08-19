@@ -1,12 +1,9 @@
 #include<iostream>
 #include<stdlib.h>
-#include<string>
-#include"ecu.hpp"
+#include"app.hpp"
 
-int main(){
-  std::cout<< "Hola mundo" <<std::endl;
-  CalculateInjection(3500, 45.0f);
-  CalculateInjection(6000, 85.0f);
-  return 0;
+int main(int argc, char* argv[]){
+ App app (argc, argv);
+ return app.run();
 }
 

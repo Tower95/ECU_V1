@@ -1,3 +1,7 @@
 #!/bin/bash
-g++ -o ./bin/ecu.exe ./src/main.cpp ./src/ecu.cpp && ./bin/ecu.exe
+g++ -o ./bin/ecu.exe \
+  ./src/main.cpp  \
+./src/ecu.cpp \
+./src/app.cpp \
+./src/input_handler.cpp && ./bin/ecu.exe --manual
 
