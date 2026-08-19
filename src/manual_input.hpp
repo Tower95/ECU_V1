@@ -1,4 +1,4 @@
 #pragma once
-#include<string>
+#include <string>
 
-std::string getInputUser(std::string sensor);
+double getInputUserDouble(std::string sensor_name );
