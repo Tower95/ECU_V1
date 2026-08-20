@@ -1,6 +1,7 @@
 #include"app.hpp"
 #include"ecu.hpp"
 #include"manual_input.hpp"
+#include"ecu_gateway.hpp"
 #include <iostream>
 
 App::App(int argc, char* argv[]){
@@ -25,8 +26,18 @@ int App::run(){
 
 void App::runManual(){
   std::cout << "[INFO] Iniciando modo manual...\n" ;
-  std::cout << getInputUserDouble("TEMPERATURA") <<std::endl;
-  // TODO 
+
+  // Uso la funcion y guardo como temperatura
+  double temperature_c = getInputUserDouble("TEMPERATURA");
+  // Valido la temperatura contra el rango del sensor
+  SignalStatus temperature_status = validateTemperature(temperature_c);
+
+
+  // Muestro el resultado de la gateway
+  std::cout << "[GATEWAY] TEMPERATURA = " << temperature_c << " C"
+            << " | rango [" << TEMP_MIN_C << ", " << TEMP_MAX_C << "]"
+            << " -> " << signalStatusToText(temperature_status)
+            << std::endl;
 }
 
 void App::runSimulation(){
