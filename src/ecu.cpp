@@ -98,6 +98,35 @@ ECUState evaluateECU(
     return ECUState::OPERATIONAL;
 }
 
+ECUState updateState(
+    ECUState currentState,
+    ECUState evaluatedState,
+    bool shutdownRequested
+) {
+    switch (currentState) {
+
+        case ECUState::INIT:
+            return ECUState::SELF_TEST;
+
+        case ECUState::SELF_TEST:
+            return evaluatedState;
+
+        case ECUState::OPERATIONAL:
+        case ECUState::DEGRADED:
+        case ECUState::SAFE_STATE:
+
+            if (shutdownRequested) {
+                return ECUState::SHUTDOWN;
+            }
+
+            return evaluatedState;
+
+        case ECUState::SHUTDOWN:
+            return ECUState::SHUTDOWN;
+    }
+
+    return ECUState::SAFE_STATE;
+}
 
 void CalculateInjection(int rpm, float throttle){
 

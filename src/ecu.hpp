@@ -22,5 +22,10 @@ ECUState evaluateECU(
     bool voltageValid
 );
 
-void CalculateInjection (int rpm, float throttle);
+ECUState updateState(
+    ECUState currentState,
+    ECUState evaluatedState,
+    bool shutdownRequested
+);
 
+void CalculateInjection (int rpm, float throttle);

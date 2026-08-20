@@ -12,7 +12,7 @@ type_input define_input(std::string input_type){
   }else {
     std::cout << "Lo siento debe seleccionar un tipo de input permitido "<<std::endl;
     std::cout << "--manual     -> Ingresar datos manualmente" << std::endl;
-    std::cout << "--simulation -> Dejar que el prgorama simule los sensores" <<std::endl;
+    std::cout << "--simulation -> Dejar que el programa simule los sensores" <<std::endl;
     return type_input::ERROR;
   }
 
