@@ -10,17 +10,22 @@ App::App(int argc, char* argv[]){
 }
 
 int App::run(){
+
   switch(mode){
+
     case type_input::MANUAL:
       runManual();
       return 0;
+
     case type_input::SIMULATION:
       runSimulation();
       return 0;
+
     case type_input::ERROR:
     default:
       return 1;
   }
+
 }
 
 void App::runManual(){
