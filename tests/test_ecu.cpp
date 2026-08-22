@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ecu.hpp"
+#include "ecu_gateway.hpp"
 
 void printState(ECUState state)
 {
@@ -33,6 +34,61 @@ void printState(ECUState state)
 
 int main()
 {
+    std::cout << "\n--- PRUEBA GATEWAY + CONTROL ECU ---\n";
+
+double speed = 300.0;       // fuera de rango
+double rpm = 9000.0;        // fuera de rango
+double temperature = 500.0; // fuera de rango
+double throttle = 35.0;
+double voltage = 13.8;
+
+// La Gateway valida los cinco valores
+SignalStatus speedStatus = validateSpeed(speed);
+SignalStatus rpmStatus = validateRpm(rpm);
+SignalStatus temperatureStatus = validateTemperature(temperature);
+SignalStatus throttleStatus = validateThrottle(throttle);
+SignalStatus voltageStatus = validateVoltage(voltage);
+
+// Mostramos lo que decidio la Gateway
+std::cout << "Velocidad: "
+          << signalStatusToText(speedStatus) << std::endl;
+
+std::cout << "RPM: "
+          << signalStatusToText(rpmStatus) << std::endl;
+
+std::cout << "Temperatura: "
+          << signalStatusToText(temperatureStatus) << std::endl;
+
+std::cout << "Acelerador: "
+          << signalStatusToText(throttleStatus) << std::endl;
+
+std::cout << "Voltaje: "
+          << signalStatusToText(voltageStatus) << std::endl;
+
+
+// Adaptamos SignalStatus a los bool que actualmente recibe tu ECU
+ECUState gatewayTestState = evaluateECU(
+    speed,
+    speedStatus == SignalStatus::VALID,
+
+    static_cast<int>(rpm),
+    rpmStatus == SignalStatus::VALID,
+
+    temperature,
+    temperatureStatus == SignalStatus::VALID,
+
+    throttle,
+    throttleStatus == SignalStatus::VALID,
+
+    voltage,
+    voltageStatus == SignalStatus::VALID
+);
+
+std::cout << "Decision Control ECU: ";
+printState(gatewayTestState);
+std::cout << std::endl;
+
+
     ECUState state = ECUState::INIT;
 
     std::cout << "Estado inicial: ";
