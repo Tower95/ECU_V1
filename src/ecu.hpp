@@ -1,15 +1,7 @@
 #pragma once
+#include "states.hpp"
 
-enum class ECUState {
-    INIT,
-    SELF_TEST,
-    OPERATIONAL,
-    DEGRADED,
-    SAFE_STATE,
-    SHUTDOWN
-};
-
-ECUState evaluateECU(
+states evaluateECU(
     double speed,
     bool speedValid,
     int rpm,
@@ -22,10 +14,4 @@ ECUState evaluateECU(
     bool voltageValid
 );
 
-ECUState updateState(
-    ECUState currentState,
-    ECUState evaluatedState,
-    bool shutdownRequested
-);
-
-void CalculateInjection (int rpm, float throttle);
+void CalculateInjection(int rpm, float throttle);

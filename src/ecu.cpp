@@ -1,7 +1,7 @@
 #include"ecu.hpp"
 #include<iostream>
 
-ECUState evaluateECU(
+states evaluateECU(
     double speed,
     bool speedValid,
     int rpm,
@@ -42,90 +42,60 @@ ECUState evaluateECU(
     // CONDICIONES CRÍTICAS "SAFE_STATE"
     // 3, 4 o 5 señales inválidas
     if (invalidCount >= 3) {
-        return ECUState::SAFE_STATE;
+        return states::SAFE_STATE;
     }
 
     // Temperatura crítica
     if (temperatureValid && temperature >= 110.0) {
-        return ECUState::SAFE_STATE;
+        return states::SAFE_STATE;
     }
 
     // RPM críticas
     if (rpmValid && rpm > 7000) {
-        return ECUState::SAFE_STATE;
+        return states::SAFE_STATE;
     }
 
     // Voltaje crítico
     if (voltageValid && voltage < 11.0) {
-        return ECUState::SAFE_STATE;
+        return states::SAFE_STATE;
     }
 
     // ADVERTENCIAS / FALLAS MENORES -> DEGRADED
     // 1 o 2 señales inválidas
     if (invalidCount >= 1) {
-        return ECUState::DEGRADED;
+        return states::DEGRADED;
     }
 
     // Temperatura alta
     if (temperatureValid && temperature >= 100.0) {
-        return ECUState::DEGRADED;
+        return states::DEGRADED;
     }
 
     // RPM altas
     if (rpmValid && rpm > 6000) {
-        return ECUState::DEGRADED;
+        return states::DEGRADED;
     }
 
     // Voltaje bajo
     if (voltageValid && voltage < 12.0) {
-        return ECUState::DEGRADED;
+        return states::DEGRADED;
     }
 
     // Acelerador alto con RPM demasiado bajas
     if (throttleValid && rpmValid &&throttle > 80.0 && rpm < 500) {
-        return ECUState::DEGRADED;
+        return states::DEGRADED;
     }
 
     // Vehículo en movimiento con motor a 0 RPM
     if (speedValid && rpmValid &&
         speed > 0.0 && rpm == 0) {
 
-        return ECUState::DEGRADED;
+        return states::DEGRADED;
     }
 
 
     // Bueni y si ya no existe ninguna condición anterior
-    return ECUState::OPERATIONAL;
-}
-
-ECUState updateState(
-    ECUState currentState,
-    ECUState evaluatedState,
-    bool shutdownRequested
-) {
-    switch (currentState) {
-
-        case ECUState::INIT:
-            return ECUState::SELF_TEST;
-
-        case ECUState::SELF_TEST:
-            return evaluatedState;
-
-        case ECUState::OPERATIONAL:
-        case ECUState::DEGRADED:
-        case ECUState::SAFE_STATE:
-
-            if (shutdownRequested) {
-                return ECUState::SHUTDOWN;
-            }
-
-            return evaluatedState;
-
-        case ECUState::SHUTDOWN:
-            return ECUState::SHUTDOWN;
-    }
-
-    return ECUState::SAFE_STATE;
+    return states::OPERATIONAL;
 }
 
 void CalculateInjection(int rpm, float throttle){
