@@ -1,16 +1,30 @@
 #include "states.hpp"
 
-states calculateNextState(states actual_state, std::string condition){
+states calculateNextState(states actual_state, states new_state){
   //EXAMPLE TODO EXTRA LOGIC
-  if(actual_state == states::INIT  && condition == "INIT"){
+  //
+  switch(actual_state){
+    case states::INIT:
 
-    return states::SELF_TEST;
+      if(new_state == states::SELF_TEST ){
 
+        return states::SELF_TEST;
+
+      }else{
+
+
+      }
+      break;
+    case states::SELF_TEST:
+      
+      if(new_state
+      break;
   }
 
   return states::ERROR;
 }
 
+//Function to parse states into String
 std::string stateToText(states state){
   switch(state){
 
