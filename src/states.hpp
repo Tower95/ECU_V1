@@ -11,7 +11,7 @@ enum class states {
   ERROR
 };
 
-states calculateNextState(states actual_state,std::string condition);
+states calculateNextState(states actual_state,states new_state);
 
 std::string stateToText(states state);
 
