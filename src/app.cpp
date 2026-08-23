@@ -31,6 +31,17 @@ int App::run()
     }
 }
 
+bool runSelfTest()
+{
+    print(type_log::INFO, "Ejecutando SELF_TEST...");
+
+    // Primera version didactica:
+    // se verificaria que la ECU pueda iniciar correctamente.
+    // Aqui pueden agregarse mas comprobaciones despues.
+
+    return true;
+}
+
 void App::runManual()
 {
     print(type_log::INFO, "Iniciando modo manual");
@@ -42,18 +53,39 @@ void App::runManual()
     ECUState boot_state = ECUState::INIT;
     ECUState current_state = ECUState::INIT;
 
-    // Desde INIT la unica transicion permitida es SELF_TEST
     current_state = applyTransition(
-        current_state,
-        ECUState::SELF_TEST
+    current_state,
+    ECUState::SELF_TEST
     );
 
-    std::cout << "[CONTROL] ESTADO: "
-              << ecuStateToText(boot_state)
-              << " -> "
-              << ecuStateToText(current_state)
-              << " (arranque)"
+std::cout << "[CONTROL] ESTADO: "
+          << ecuStateToText(boot_state)
+          << " -> "
+          << ecuStateToText(current_state)
+          << " (arranque)"
+          << std::endl;
+
+bool self_test_ok = runSelfTest();
+
+if (!self_test_ok)
+{
+    current_state = applyTransition(
+        current_state,
+        ECUState::SAFE_STATE
+    );
+
+    std::cout << "[CONTROL] SELF_TEST FALLIDO"
               << std::endl;
+
+    std::cout << "[CONTROL] ESTADO: SELF_TEST -> "
+              << ecuStateToText(current_state)
+              << std::endl;
+
+    return;
+}
+
+std::cout << "[CONTROL] SELF_TEST COMPLETADO"
+          << std::endl;
 
     bool running = true;
 
