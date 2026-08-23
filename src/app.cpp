@@ -34,11 +34,9 @@ int App::run()
 bool runSelfTest()
 {
     print(type_log::INFO, "Ejecutando SELF_TEST...");
-
     // Primera version didactica:
-    // se verificaria que la ECU pueda iniciar correctamente.
-    // Aqui pueden agregarse mas comprobaciones despues.
-
+    // se verificaria que la ECU pueda iniciar correctamente
+    // Aqui pueden agregarse mas comprobaciones despues
     return true;
 }
 
@@ -46,10 +44,7 @@ void App::runManual()
 {
     print(type_log::INFO, "Iniciando modo manual");
 
-    // ============================================================
     // 1. ARRANQUE DE LA MAQUINA DE ESTADOS
-    // ============================================================
-
     ECUState boot_state = ECUState::INIT;
     ECUState current_state = ECUState::INIT;
 
@@ -89,22 +84,14 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
 
     bool running = true;
 
-
-    // ============================================================
     // 2. CICLO PRINCIPAL
-    // ============================================================
-
     while (running)
     {
         std::cout << "\n========================================\n";
         std::cout << " NUEVO CICLO DE LECTURA\n";
         std::cout << "========================================\n";
 
-
-        // ========================================================
         // 3. CAPTURA DE LAS CINCO SEÑALES
-        // ========================================================
-
         double speed_kmh =
             getInputUserDouble("VELOCIDAD");
 
@@ -120,11 +107,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
         double voltage_v =
             getInputUserDouble("VOLTAJE");
 
-
-        // ========================================================
         // 4. VALIDACION DE LA GATEWAY ECU
-        // ========================================================
-
         SignalStatus speed_status =
             validateSpeed(speed_kmh);
 
@@ -142,11 +125,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
 
         std::cout << std::endl;
 
-
-        // ========================================================
         // 5. REPORTE DE LA GATEWAY
-        // ========================================================
-
         validateGateWay(
             signals::VELOCIDAD,
             speed_kmh,
@@ -177,11 +156,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             voltage_status
         );
 
-
-        // ========================================================
         // 6. EVALUACION INDIVIDUAL DE LA CONTROL ECU
-        // ========================================================
-
         ConditionLevel rpm_level =
             classifyRpm(
                 rpm,
@@ -200,11 +175,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 voltage_status
             );
 
-
-        // ========================================================
         // 7. PEOR CONDICION DE LAS SEÑALES CON UMBRAL
-        // ========================================================
-
         ConditionLevel threshold_level =
             worstThresholdCondition(
                 rpm,
@@ -217,11 +188,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 voltage_status
             );
 
-
-        // ========================================================
         // 8. CONTEO DE SEÑALES INVALIDAS
-        // ========================================================
-
         int invalid_count =
             totalInvalidCount(
                 speed_status,
@@ -236,11 +203,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 invalid_count
             );
 
-
-        // ========================================================
         // 9. REGLAS DE COHERENCIA
-        // ========================================================
-
         ConditionLevel speed_rpm_level =
             speedRpmCoherence(
                 speed_kmh,
@@ -283,11 +246,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 voltage_status
             );
 
-
-        // ========================================================
         // 10. CONDICION GLOBAL DEL SISTEMA
-        // ========================================================
-
         ConditionLevel system_level =
             worstCondition(
                 worstCondition(
@@ -297,11 +256,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 coherence_level
             );
 
-
-        // ========================================================
         // 11. ESTADO SOLICITADO POR LA CONTROL ECU
-        // ========================================================
-
         ECUState requested_state =
             requestedState(
                 system_level
@@ -316,11 +271,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 requested_state
             );
 
-
-        // ========================================================
         // 12. REPORTE DE LA CONTROL ECU
-        // ========================================================
-
         std::cout << std::endl;
 
         std::cout
@@ -336,7 +287,6 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << conditionLevelToText(rpm_level)
             << std::endl;
 
-
         std::cout
             << "[CONTROL] TEMPERATURA = "
             << temperature_c
@@ -349,7 +299,6 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << " -> "
             << conditionLevelToText(temperature_level)
             << std::endl;
-
 
         std::cout
             << "[CONTROL] VOLTAJE = "
@@ -364,7 +313,6 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << conditionLevelToText(voltage_level)
             << std::endl;
 
-
         std::cout
             << "[CONTROL] SEÑALES INVALIDAS = "
             << invalid_count
@@ -377,7 +325,6 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << conditionLevelToText(invalid_level)
             << std::endl;
 
-
         std::cout
             << "[CONTROL] COHERENCIA velocidad/RPM"
             << " | velocidad > "
@@ -387,7 +334,6 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << " -> "
             << conditionLevelToText(speed_rpm_level)
             << std::endl;
-
 
         std::cout
             << "[CONTROL] COHERENCIA acelerador/RPM"
@@ -399,7 +345,6 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << conditionLevelToText(throttle_rpm_level)
             << std::endl;
 
-
         std::cout
             << "[CONTROL] COHERENCIA temperatura/voltaje"
             << " | temperatura >= "
@@ -410,17 +355,12 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << conditionLevelToText(temp_voltage_level)
             << std::endl;
 
-
         std::cout
             << "[CONTROL] CONDICION DEL SISTEMA -> "
             << conditionLevelToText(system_level)
             << std::endl;
 
-
-        // ========================================================
         // 13. REPORTE DE LA MAQUINA DE ESTADOS
-        // ========================================================
-
         std::cout
             << "[CONTROL] ESTADO SOLICITADO: "
             << ecuStateToText(requested_state)
@@ -433,11 +373,7 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
             << ecuStateToText(current_state)
             << std::endl;
 
-
-        // ========================================================
         // 14. CONTINUAR O FINALIZAR
-        // ========================================================
-
         int option = 0;
 
         std::cout
