@@ -271,92 +271,52 @@ std::cout << "[CONTROL] SELF_TEST COMPLETADO"
                 requested_state
             );
 
-        // 12. REPORTE DE LA CONTROL ECU
-        std::cout << std::endl;
+  // 12. REPORTE DE CONTROL ECU
+  std::cout << std::endl;
 
-        std::cout
-            << "[CONTROL] RPM = "
-            << rpm
-            << " rpm"
-            << " | referencia operativa [advertencia > "
-            << RPM_WARNING
-            << ", critica > "
-            << RPM_CRITICAL
-            << "]"
-            << " -> "
-            << conditionLevelToText(rpm_level)
+  std::cout << "[CONTROL] RPM = " << rpm << " rpm"
+            << " | referencia operativa [advertencia > " << RPM_WARNING
+            << ", critica > " << RPM_CRITICAL << "]"
+            << " -> " << conditionLevelToText(rpm_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] TEMPERATURA = "
-            << temperature_c
-            << " C"
-            << " | referencia operativa [advertencia >= "
-            << TEMP_WARNING_C
-            << ", critica >= "
-            << TEMP_CRITICAL_C
-            << "]"
-            << " -> "
-            << conditionLevelToText(temperature_level)
+  std::cout << "[CONTROL] TEMPERATURA = " << temperature_c << " C"
+            << " | referencia operativa [advertencia >= " << TEMP_WARNING_C
+            << ", critica >= " << TEMP_CRITICAL_C << "]"
+            << " -> " << conditionLevelToText(temperature_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] VOLTAJE = "
-            << voltage_v
-            << " V"
-            << " | referencia operativa [advertencia < "
-            << VOLTAGE_WARNING_V
-            << ", critica < "
-            << VOLTAGE_CRITICAL_V
-            << "]"
-            << " -> "
-            << conditionLevelToText(voltage_level)
+  std::cout << "[CONTROL] VOLTAJE = " << voltage_v << " V"
+            << " | referencia operativa [advertencia < " << VOLTAGE_WARNING_V
+            << ", critica < " << VOLTAGE_CRITICAL_V << "]"
+            << " -> " << conditionLevelToText(voltage_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] SEÑALES INVALIDAS = "
-            << invalid_count
-            << " de 5"
-            << " | falla menor desde "
-            << INVALID_COUNT_FOR_WARNING
-            << ", falla critica desde "
-            << INVALID_COUNT_FOR_CRITICAL
-            << " -> "
-            << conditionLevelToText(invalid_level)
+  std::cout << "[CONTROL] SEÑALES INVALIDAS = " << invalid_count << " de 5"
+            << " | falla menor desde " << INVALID_COUNT_FOR_WARNING
+            << ", falla critica desde " << INVALID_COUNT_FOR_CRITICAL
+            << " -> " << conditionLevelToText(invalid_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] COHERENCIA velocidad/RPM"
-            << " | velocidad > "
-            << COHERENCE_SPEED_STOPPED_KMH
-            << " con RPM <= "
-            << COHERENCE_RPM_STOPPED
-            << " -> "
-            << conditionLevelToText(speed_rpm_level)
+  std::cout << "[CONTROL] COHERENCIA velocidad/RPM"
+            << " | velocidad > " << COHERENCE_SPEED_STOPPED_KMH
+            << " con RPM <= " << COHERENCE_RPM_STOPPED
+            << " -> " << conditionLevelToText(speed_rpm_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] COHERENCIA acelerador/RPM"
-            << " | acelerador > "
-            << COHERENCE_THROTTLE_HIGH_PCT
-            << " % con RPM < "
-            << COHERENCE_RPM_IDLE
-            << " -> "
-            << conditionLevelToText(throttle_rpm_level)
+  std::cout << "[CONTROL] COHERENCIA acelerador/RPM"
+            << " | acelerador > " << COHERENCE_THROTTLE_HIGH_PCT << " %"
+            << " con RPM < " << COHERENCE_RPM_IDLE
+            << " -> " << conditionLevelToText(throttle_rpm_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] COHERENCIA temperatura/voltaje"
-            << " | temperatura >= "
-            << TEMP_WARNING_C
-            << " con voltaje < "
-            << VOLTAGE_WARNING_V
-            << " -> "
-            << conditionLevelToText(temp_voltage_level)
+  std::cout << "[CONTROL] COHERENCIA temperatura/voltaje"
+            << " | temperatura >= " << TEMP_WARNING_C
+            << " con voltaje < " << VOLTAGE_WARNING_V
+            << " -> " << conditionLevelToText(temp_voltage_level)
             << std::endl;
 
-        std::cout
-            << "[CONTROL] CONDICION DEL SISTEMA -> "
+  std::cout << "[CONTROL] CONDICION DEL SISTEMA -> "
             << conditionLevelToText(system_level)
             << std::endl;
 
