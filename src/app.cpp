@@ -51,32 +51,13 @@ void App::runManual(){
 
   std::cout << std::endl;
 
+  // Aplicar TRY, para no repetir el mismo codigo de validacion                                                                                                                     
+  validateGateWay(signals::VELOCIDAD, speed_kmh, speed_status);
+  validateGateWay(signals::RPM, rpm,rpm_status );
+  validateGateWay(signals::TEMPERATURA, temperature_c,temperature_status );
+  validateGateWay(signals::ACELERADOR, throttle_pct, throttle_status);
+  validateGateWay(signals::VOLTAJE, voltage_v, voltage_status);
 
-  // Aplicar TRY, para no repetir el mismo codigo de validacion
-  std::cout << "[GATEWAY] VELOCIDAD = " << speed_kmh << " km/h"
-            << " | rango fisico [" << SPEED_MIN_KMH << ", " << SPEED_MAX_KMH << "]"
-            << " -> " << signalStatusToText(speed_status)
-            << std::endl;
-
-  std::cout << "[GATEWAY] RPM = " << rpm << " rpm"
-            << " | rango fisico [" << RPM_MIN << ", " << RPM_MAX << "]"
-            << " -> " << signalStatusToText(rpm_status)
-            << std::endl;
-
-  std::cout << "[GATEWAY] TEMPERATURA = " << temperature_c << " C"
-            << " | rango fisico [" << TEMP_MIN_C << ", " << TEMP_MAX_C << "]"
-            << " -> " << signalStatusToText(temperature_status)
-            << std::endl;
-
-  std::cout << "[GATEWAY] ACELERADOR = " << throttle_pct << " %"
-            << " | rango fisico [" << THROTTLE_MIN_PCT << ", " << THROTTLE_MAX_PCT << "]"
-            << " -> " << signalStatusToText(throttle_status)
-            << std::endl;
-
-  std::cout << "[GATEWAY] VOLTAJE = " << voltage_v << " V"
-            << " | rango fisico [" << VOLTAGE_MIN_V << ", " << VOLTAGE_MAX_V << "]"
-            << " -> " << signalStatusToText(voltage_status)
-            << std::endl;
 
   // =====================================================================
   // INIT -> SELF_TEST -> ... de momento no lo acciona ninguna seña
@@ -92,7 +73,7 @@ void App::runManual(){
   ConditionLevel temperature_level = classifyTemperature(temperature_c, temperature_status);
   ConditionLevel voltage_level     = classifyVoltage(voltage_v, voltage_status);
 
-  // Para determinar la condicion del sistema se evalua cada termino agregadp desde la ECU de control
+  // Para determinar la condicion del sistema se evalua cada termino agregado desde la ECU de control
   ConditionLevel threshold_level = worstThresholdCondition(rpm,           rpm_status,
                                                            temperature_c, temperature_status,
                                                            voltage_v,     voltage_status);
@@ -176,13 +157,6 @@ void App::runManual(){
   std::cout << "[CONTROL] ESTADO: " << ecuStateToText(current_state)
             << " -> " << ecuStateToText(next_state)
             << std::endl;
-  // =====================================================================
-  // Aplicar TRY, para no repetir el mismo codigo de validacion                                                                                                                     
-  validateGateWay(signals::VELOCIDAD, speed_kmh, speed_status);
-  validateGateWay(signals::RPM, rpm,rpm_status );
-  validateGateWay(signals::TEMPERATURA, temperature_c,temperature_status );
-  validateGateWay(signals::ACELERADOR, throttle_pct, throttle_status);
-  validateGateWay(signals::VOLTAJE, voltage_v, voltage_status);
 }
 
 void App::runSimulation(){
