@@ -17,7 +17,6 @@ states calculateNextState(states actual_state, states new_state){
       break;
     case states::SELF_TEST:
       
-      if(new_state
       break;
   }
 
