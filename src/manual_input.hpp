@@ -2,3 +2,5 @@
 #include <string>
 
 double getInputUserDouble(std::string sensor_name );
+
+int getInputOption();

@@ -25,6 +25,7 @@ void print(type_log type, string text);
 
 void validateGateWay(signals signal,double value, SignalStatus status); 
 
-string controReport();
+void controlOperative(signals signal,double value, SignalStatus status);
 
+void printMenu();
 

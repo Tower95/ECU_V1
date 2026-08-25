@@ -36,6 +36,22 @@ int App::run(){
 void App::runManual(){
   print(type_log::INFO , "Iniciando modo manual");
 
+  // =====================================================================
+  // INIT -> SELF_TEST -> ... de momento no lo acciona ninguna seña
+  // la ECU de control entra con el estado que recibe
+  ECUState boot_state    = ECUState::INIT;
+  ECUState current_state = ECUState::INIT;
+
+  // desde INIT la unica salida legal es SELF_TEST, por eso la aplico directamente
+  current_state = applyTransition(boot_state, ECUState::SELF_TEST);
+
+  print(type_log::CONTROL,  ecuStateToText(boot_state)
+            + " -> " + ecuStateToText(current_state)
+            + "   (arranque)");
+
+
+  while(true){
+    if(getInputOption()!= 2){
   // Primero se capturan los valores, despues se validan y se reportan
   double speed_kmh     = getInputUserDouble("VELOCIDAD");
   double rpm           = getInputUserDouble("RPM");
@@ -58,15 +74,6 @@ void App::runManual(){
   validateGateWay(signals::ACELERADOR, throttle_pct, throttle_status);
   validateGateWay(signals::VOLTAJE, voltage_v, voltage_status);
 
-
-  // =====================================================================
-  // INIT -> SELF_TEST -> ... de momento no lo acciona ninguna seña
-  // la ECU de control entra con el estado que recibe
-  ECUState boot_state    = ECUState::INIT;
-  ECUState current_state = ECUState::INIT;
-
-  // desde INIT la unica salida legal es SELF_TEST, por eso la aplico directamente
-  current_state = applyTransition(boot_state, ECUState::SELF_TEST);
 
   // Niveles por señal,velocidad y acelerador no aparecen porque no tienen referencia operativa
   ConditionLevel rpm_level         = classifyRpm(rpm, rpm_status);
@@ -149,14 +156,16 @@ void App::runManual(){
             << conditionLevelToText(system_level)
             << std::endl;
 
-  std::cout << "[CONTROL] ESTADO: " << ecuStateToText(boot_state)
-            << " -> " << ecuStateToText(current_state)
-            << "   (arranque)" // No lo decide ninguna señal, lo decide el arranque
-            << std::endl;
-
   std::cout << "[CONTROL] ESTADO: " << ecuStateToText(current_state)
             << " -> " << ecuStateToText(next_state)
-            << std::endl;
+            <<"\n\n";
+
+            current_state = next_state;
+  }
+  else{
+    break;
+  }
+  }
 }
 
 void App::runSimulation(){
