@@ -6,6 +6,9 @@
 #include"ecu_state.hpp"
 #include <iostream>
 #include "logs.hpp"
+#include <thread>
+#include <chrono>
+#include "simulator.hpp"
 
 App::App(int argc, char* argv[]){
   std::string arg =(argc > 1) ? argv[1] :"";
@@ -51,6 +54,7 @@ void App::runManual(){
 
 
   while(true){
+    
     if(getInputOption()!= 2){
   // Primero se capturan los valores, despues se validan y se reportan
   double speed_kmh     = getInputUserDouble("VELOCIDAD");
@@ -170,5 +174,157 @@ void App::runManual(){
 
 void App::runSimulation(){
   print(type_log::INFO, "Iniciando modo simulacion...");
-  // TODO
+  
+
+  // =====================================================================
+  // INIT -> SELF_TEST -> ... la simulacion arranca igual que el modo manual
+  ECUState boot_state    = ECUState::INIT;
+  ECUState current_state = ECUState::INIT;
+
+  // desde INIT la unica salida legal es SELF_TEST, por eso la aplico directamente
+  current_state = applyTransition(boot_state, ECUState::SELF_TEST);
+
+  print(type_log::CONTROL,  ecuStateToText(boot_state)
+            + " -> " + ecuStateToText(current_state)
+            + "   (arranque simulacion)");
+
+  // El simulador genera los datos iniciales del vehiculo (motor apagado, temperatura ambiente)
+  DatosVehiculo datos = generarDatosIniciales();
+
+  int ciclo = 0;
+
+  // El loop corre hasta que el sistema llegue a SAFE_STATE (condicion critica)
+  while(current_state != ECUState::SAFE_STATE){
+std::system("clear");
+    ciclo++;
+    std::cout << "\n========== CICLO " << ciclo << " ==========" << std::endl;
+
+    // El simulador actualiza los datos del vehiculo con variaciones aleatorias
+    datos = actualizarSimulador(datos);
+
+    // ---------------------------------------------------------------
+    // GATEWAY: cada señal se valida contra su rango fisico
+    // ---------------------------------------------------------------
+    SignalStatus speed_status       = validateSpeed(datos.speed_kmh);
+    SignalStatus rpm_status         = validateRpm(datos.rpm);
+    SignalStatus temperature_status = validateTemperature(datos.temp_c);
+    SignalStatus throttle_status    = validateThrottle(datos.throttle_pct);
+    SignalStatus voltage_status     = validateVoltage(datos.voltage_v);
+
+    // Reporte de la gateway
+    validateGateWay(signals::VELOCIDAD,   datos.speed_kmh,    speed_status);
+    validateGateWay(signals::RPM,         datos.rpm,          rpm_status);
+    validateGateWay(signals::TEMPERATURA, datos.temp_c,       temperature_status);
+    validateGateWay(signals::ACELERADOR,  datos.throttle_pct, throttle_status);
+    validateGateWay(signals::VOLTAJE,     datos.voltage_v,    voltage_status);
+
+    // ---------------------------------------------------------------
+    // ECU DE CONTROL: clasificacion por umbrales operativos
+    // velocidad y acelerador no aparecen porque no tienen referencia operativa
+    // ---------------------------------------------------------------
+    ConditionLevel rpm_level         = classifyRpm(datos.rpm, rpm_status);
+    ConditionLevel temperature_level = classifyTemperature(datos.temp_c, temperature_status);
+    ConditionLevel voltage_level     = classifyVoltage(datos.voltage_v, voltage_status);
+
+    // Para determinar la condicion del sistema se evalua cada termino agregado desde la ECU de control
+    ConditionLevel threshold_level = worstThresholdCondition(datos.rpm,    rpm_status,
+                                                             datos.temp_c, temperature_status,
+                                                             datos.voltage_v, voltage_status);
+
+    int            invalid_count = totalInvalidCount(speed_status,
+                                                     rpm_status,
+                                                     temperature_status,
+                                                     throttle_status,
+                                                     voltage_status);
+    ConditionLevel invalid_level = classifyInvalidCount(invalid_count);
+
+    // ---------------------------------------------------------------
+    // Reglas de coherencia: cada regla por separado
+    // ---------------------------------------------------------------
+    ConditionLevel speed_rpm_level    = speedRpmCoherence(datos.speed_kmh, speed_status,
+                                                          datos.rpm,       rpm_status);
+    ConditionLevel throttle_rpm_level = throttleRpmCoherence(datos.throttle_pct, throttle_status,
+                                                              datos.rpm,          rpm_status);
+    ConditionLevel temp_voltage_level = temperatureVoltageCoherence(datos.temp_c,   temperature_status,
+                                                                     datos.voltage_v, voltage_status);
+
+    ConditionLevel coherence_level = coherenceCondition(datos.speed_kmh,    speed_status,
+                                                        datos.rpm,          rpm_status,
+                                                        datos.temp_c,       temperature_status,
+                                                        datos.throttle_pct, throttle_status,
+                                                        datos.voltage_v,    voltage_status);
+
+    // ---------------------------------------------------------------
+    // Condicion global del sistema: la peor entre umbrales, invalidas y coherencia
+    // ---------------------------------------------------------------
+    ConditionLevel system_level = worstCondition(worstCondition(threshold_level, invalid_level),
+                                                 coherence_level);
+    ECUState       next_state   = applyTransition(current_state, requestedState(system_level));
+
+    // ---------------------------------------------------------------
+    // Reporte de la ECU de control
+    // ---------------------------------------------------------------
+    std::cout << std::endl;
+
+    std::cout << "[CONTROL] RPM = " << datos.rpm << " rpm"
+              << " | referencia operativa [advertencia > " << RPM_WARNING
+              << ", critica > " << RPM_CRITICAL << "]"
+              << " -> " << conditionLevelToText(rpm_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] TEMPERATURA = " << datos.temp_c << " C"
+              << " | referencia operativa [advertencia >= " << TEMP_WARNING_C
+              << ", critica >= " << TEMP_CRITICAL_C << "]"
+              << " -> " << conditionLevelToText(temperature_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] VOLTAJE = " << datos.voltage_v << " V"
+              << " | referencia operativa [advertencia < " << VOLTAGE_WARNING_V
+              << ", critica < " << VOLTAGE_CRITICAL_V << "]"
+              << " -> " << conditionLevelToText(voltage_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] SEÑALES INVALIDAS = " << invalid_count << " de 5"
+              << " | falla menor desde " << INVALID_COUNT_FOR_WARNING
+              << ", falla critica desde " << INVALID_COUNT_FOR_CRITICAL
+              << " -> " << conditionLevelToText(invalid_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] COHERENCIA velocidad/RPM"
+              << " | velocidad > " << COHERENCE_SPEED_STOPPED_KMH
+              << " con RPM <= " << COHERENCE_RPM_STOPPED
+              << " -> " << conditionLevelToText(speed_rpm_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] COHERENCIA acelerador/RPM"
+              << " | acelerador > " << COHERENCE_THROTTLE_HIGH_PCT << " %"
+              << " con RPM < " << COHERENCE_RPM_IDLE
+              << " -> " << conditionLevelToText(throttle_rpm_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] COHERENCIA temperatura/voltaje"
+              << " | temperatura >= " << TEMP_WARNING_C
+              << " con voltaje < " << VOLTAGE_WARNING_V
+              << " -> " << conditionLevelToText(temp_voltage_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] CONDICION DEL SISTEMA -> "
+              << conditionLevelToText(system_level)
+              << std::endl;
+
+    std::cout << "[CONTROL] ESTADO: " << ecuStateToText(current_state)
+              << " -> " << ecuStateToText(next_state)
+              << "\n\n";
+
+    // La maquina de estados aplica la transicion
+    current_state = next_state;
+
+    // Pausa de 1 segundo (1000 milisegundos) entre ciclos
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+  }
+
+  // Si salio del loop es porque llego a SAFE_STATE
+  print(type_log::WARNING, "Simulacion terminada: el sistema alcanzo SAFE_STATE en el ciclo "
+        + std::to_string(ciclo));
 }

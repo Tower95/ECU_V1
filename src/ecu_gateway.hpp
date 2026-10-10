@@ -15,6 +15,15 @@ enum class SignalStatus {
   NOT_AVAILABLE   // la lectura no llego
 };
 
+// Estructura para agrupar los datos del Vehiculo
+struct DatosVehiculo {
+  double speed_kmh;       // km/h
+  int    rpm;             // rpm
+  double temp_c;          // grados Celsius
+  double voltage_v;       // volts
+  double throttle_pct;    // porcentaje de acelerador
+};
+
 // Nota sobre NOT_AVAILABLE:
 // Aunque aun no se implementa, la Gateway deberia poder reportar que un sensor no esta disponible(tal como se solicita en la documentación)
 // Por eso desde ahora ya la incluyo en el enum

@@ -10,4 +10,5 @@ g++ -Wall -Wextra -pedantic -o ./bin/ecu.exe \
   ./src/ecu_gateway.cpp \
   ./src/ecu_control.cpp \
   ./src/ecu_state.cpp \
-  ./src/logs.cpp && ./bin/ecu.exe --manual
+  ./src/logs.cpp \
+  ./src/simulator.cpp && ./bin/ecu.exe --manual
